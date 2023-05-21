@@ -82,4 +82,4 @@ class Telegram:
 
 if __name__=='__main__':
     data_obj = Data('15m','ethtry',14)
-    Telegram('6247116301:AAFShT7Nk9yn-Hm5AfbPYPAO7EMDBV5TYOY','804636818', data_obj)
+    Telegram(YOURAPIKEY,YOURCHATID, data_obj)
