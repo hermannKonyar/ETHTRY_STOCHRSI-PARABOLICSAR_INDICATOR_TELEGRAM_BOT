@@ -77,6 +77,6 @@ class Telegram:
 
 
 if __name__ == '__main__':
-    telegram_instance = Telegram('6247116301:AAFShT7Nk9yn-Hm5AfbPYPAO7EMDBV5TYOY', '804636818')
+    telegram_instance = Telegram(TELEGRAM API KEY, YOUR CHAT ID)
     data_instance = Data('15m', 'ethtry', 14, telegram_instance)
-    telegram_instance.runBot('6247116301:AAFShT7Nk9yn-Hm5AfbPYPAO7EMDBV5TYOY', data_instance)
+    telegram_instance.runBot(TELEGRAM API KEY, data_instance)
