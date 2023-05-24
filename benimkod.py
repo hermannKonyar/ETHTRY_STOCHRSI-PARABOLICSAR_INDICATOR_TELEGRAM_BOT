@@ -25,31 +25,43 @@ class Data:
 
         df = pd.DataFrame(data)
         df.columns = ['open_time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume',
-                      'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore']
+                    'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore']
         df['close'] = pd.to_numeric(df['close'])
 
         # Calculate RSI
-        rsi = talib.RSI(df['close'], timeperiod=self.period)
+        delta = df['close'].diff()
+        up = delta.clip(lower=0)
+        down = -1*delta.clip(upper=0)
+        ema_up = up.ewm(com=self.period-1, adjust=False).mean()
+        ema_down = down.ewm(com=self.period-1, adjust=False).mean()
+        rs = ema_up/ema_down
+        rsi = 100 - (100/(1 + rs))
+
 
         # Calculate StochRSI 'K' and 'D' lines
-        stoch_rsi_k = (rsi - rsi.rolling(window=self.period).min()) / (
-                rsi.rolling(window=self.period).max() - rsi.rolling(window=self.period).min())
-        stoch_rsi_k = stoch_rsi_k * 100
+        min_rsi = rsi.rolling(window=self.period).min()
+        max_rsi = rsi.rolling(window=self.period).max()
+        stoch_rsi = 100 * (rsi - min_rsi) / (max_rsi - min_rsi)
+
+
+        stoch_rsi_k = stoch_rsi.rolling(window=3).mean()
         stoch_rsi_d = stoch_rsi_k.rolling(window=3).mean()
 
         context.bot_data['k'] = stoch_rsi_k.iloc[-1]
         context.bot_data['d'] = stoch_rsi_d.iloc[-1]
 
+
         self.analyze_data(context)
+
 
     def analyze_data(self, context: CallbackContext):
         k = context.bot_data.get('k')
         d = context.bot_data.get('d')
 
         if k is not None and d is not None:
-            if k > 70 and d > 70:
+            if k > 90 and d > 90:
                 action = 'SAT'
-            elif k < 30 and d < 30:
+            elif k < 10 and d < 10:
                 action = 'AL'
             else:
                 action = 'BEKLE'
@@ -77,6 +89,6 @@ class Telegram:
 
 
 if __name__ == '__main__':
-    telegram_instance = Telegram(TELEGRAM API KEY, YOUR CHAT ID)
+    telegram_instance = Telegram('TELEGRAP API KEY', 'CHAT ID')
     data_instance = Data('15m', 'ethtry', 14, telegram_instance)
-    telegram_instance.runBot(TELEGRAM API KEY, data_instance)
+    telegram_instance.runBot('TELEGRAM API KEY', data_instance)
